@@ -1,3 +1,10 @@
+ARM_CLIENT_ID=9f3e653d-3f0f-4797-86c1-4755427a6796
+ARM_TENANT_ID=73e31ee9-3416-4eff-a80b-31fdf2dc2d7b
+ARM_CLIENT_SECRET=R85SN~HrO_C9drM_1Pu9YjtCBGo3sEoVZm
+ARM_SUBSCRIPTION_ID=f110dbef-9b94-43e9-a919-008c2f159717
+
+
+
 terraform {
   required_providers {
     azurerm = {
