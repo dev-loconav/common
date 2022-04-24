@@ -137,6 +137,7 @@ resource "azurerm_linux_virtual_machine" "terraformvm21" {
     resource_group_name   = "loconav-test"
     network_interface_ids = [azurerm_network_interface.myterraformnic21.id]
     size                  = "Standard_D2s_v3"
+    availability_set_id   = "/subscriptions/f110dbef-9b94-43e9-a919-008c2f159717/resourceGroups/loconav-test/providers/Microsoft.Compute/availabilitySets/kubeapias"
 
     os_disk {
         name              = "vm21OsDisk"
@@ -228,6 +229,7 @@ resource "azurerm_linux_virtual_machine" "terraformvm22" {
     resource_group_name   = "loconav-test"
     network_interface_ids = [azurerm_network_interface.myterraformnic22.id]
     size                  = "Standard_D2s_v3"
+    availability_set_id   = "/subscriptions/f110dbef-9b94-43e9-a919-008c2f159717/resourceGroups/loconav-test/providers/Microsoft.Compute/availabilitySets/kubeapias"
 
     os_disk {
         name              = "vm22OsDisk"
@@ -320,6 +322,7 @@ resource "azurerm_linux_virtual_machine" "terraformvm23" {
     resource_group_name   = "loconav-test"
     network_interface_ids = [azurerm_network_interface.myterraformnic23.id]
     size                  = "Standard_D2s_v3"
+    availability_set_id   = "/subscriptions/f110dbef-9b94-43e9-a919-008c2f159717/resourceGroups/loconav-test/providers/Microsoft.Compute/availabilitySets/kubeapias"
 
     os_disk {
         name              = "vm23OsDisk"
@@ -411,6 +414,7 @@ resource "azurerm_linux_virtual_machine" "terraformvm24" {
     resource_group_name   = "loconav-test"
     network_interface_ids = [azurerm_network_interface.myterraformnic24.id]
     size                  = "Standard_D2s_v3"
+    availability_set_id   = "/subscriptions/f110dbef-9b94-43e9-a919-008c2f159717/resourceGroups/loconav-test/providers/Microsoft.Compute/availabilitySets/kubeapias"
 
     os_disk {
         name              = "vm24OsDisk"
@@ -469,3 +473,188 @@ resource "azurerm_virtual_machine_extension" "test24" {
     }
 SETTINGS
 }
+#####VM25###
+# Create network interface
+resource "azurerm_network_interface" "myterraformnic25" {
+    name                      = "vm25NIC"
+    location                  = "eastus"
+    resource_group_name       = "loconav-test"
+
+    ip_configuration {
+        name                          = "vm25NicConfiguration"
+        subnet_id                     = azurerm_subnet.myterraformsubnet.id
+        private_ip_address_allocation = "Dynamic"
+    }
+
+    tags = {
+        environment = "test1"
+    }
+}
+
+# Connect the security group to the network interface
+resource "azurerm_network_interface_security_group_association" "example25" {
+    network_interface_id      = azurerm_network_interface.myterraformnic25.id
+    network_security_group_id = azurerm_network_security_group.myterraformnsg.id
+}
+
+
+
+# Create virtual machine
+resource "azurerm_linux_virtual_machine" "terraformvm25" {
+    name                  = "vm25"
+    location              = "eastus"
+    resource_group_name   = "loconav-test"
+    network_interface_ids = [azurerm_network_interface.myterraformnic25.id]
+    size                  = "Standard_D2s_v3"
+    availability_set_id   = "/subscriptions/f110dbef-9b94-43e9-a919-008c2f159717/resourceGroups/loconav-test/providers/Microsoft.Compute/availabilitySets/kubeapias"
+
+    os_disk {
+        name              = "vm25OsDisk"
+        caching           = "ReadWrite"
+        storage_account_type = "Standard_LRS"
+    }
+
+    source_image_reference {
+        publisher = "Canonical"
+        offer     = "UbuntuServer"
+        sku       = "18.04-LTS"
+        version   = "latest"
+    }
+
+    computer_name  = "vm25"
+    admin_username = "azuser"
+    disable_password_authentication = false
+    admin_password = "1244qwer!@#$"
+
+    
+    boot_diagnostics {
+        storage_account_uri = azurerm_storage_account.mystorageaccount.primary_blob_endpoint
+    }
+
+    tags = {
+        environment = "test1"
+    }
+}
+resource "azurerm_managed_disk" "vm25disk" {
+  name                 = "vm25-disk1"
+  location             = "eastus"
+  resource_group_name  = "loconav-test"
+  storage_account_type = "Standard_LRS"
+  create_option        = "Empty"
+  disk_size_gb         = 32
+}
+
+resource "azurerm_virtual_machine_data_disk_attachment" "example25" {
+  managed_disk_id    = azurerm_managed_disk.vm25disk.id
+  virtual_machine_id = azurerm_linux_virtual_machine.terraformvm25.id
+  lun                = "1"
+  caching            = "ReadWrite"
+}
+
+
+resource "azurerm_virtual_machine_extension" "test25" {
+  name                 = "hostname25"
+  virtual_machine_id   = azurerm_linux_virtual_machine.terraformvm25.id
+  publisher            = "Microsoft.Azure.Extensions"
+  type                 = "CustomScript"
+  type_handler_version = "2.0"
+
+  settings = <<SETTINGS
+    {
+        "commandToExecute": "apt-get update; apt-get install perl;useradd -m -p $(perl -e 'print crypt($ARGV[0], \"password\")' 'deployer') \"deployer\"; echo \"deployer ALL=(ALL) NOPASSWD:ALL\" >> /etc/sudoers.d/90-cloud-init-users; apt-get install sshpass"
+    }
+SETTINGS
+}
+#####VM26###
+# Create network interface
+resource "azurerm_network_interface" "myterraformnic26" {
+    name                      = "vm26NIC"
+    location                  = "eastus"
+    resource_group_name       = "loconav-test"
+
+    ip_configuration {
+        name                          = "vm26NicConfiguration"
+        subnet_id                     = azurerm_subnet.myterraformsubnet.id
+        private_ip_address_allocation = "Dynamic"
+    }
+
+    tags = {
+        environment = "test1"
+    }
+}
+
+# Connect the security group to the network interface
+resource "azurerm_network_interface_security_group_association" "example26" {
+    network_interface_id      = azurerm_network_interface.myterraformnic26.id
+    network_security_group_id = azurerm_network_security_group.myterraformnsg.id
+}
+
+
+
+# Create virtual machine
+resource "azurerm_linux_virtual_machine" "terraformvm26" {
+    name                  = "vm26"
+    location              = "eastus"
+    resource_group_name   = "loconav-test"
+    network_interface_ids = [azurerm_network_interface.myterraformnic26.id]
+    size                  = "Standard_D2s_v3"
+    availability_set_id   = "/subscriptions/f110dbef-9b94-43e9-a919-008c2f159717/resourceGroups/loconav-test/providers/Microsoft.Compute/availabilitySets/kubeapias"
+
+    os_disk {
+        name              = "vm26OsDisk"
+        caching           = "ReadWrite"
+        storage_account_type = "Standard_LRS"
+    }
+
+    source_image_reference {
+        publisher = "Canonical"
+        offer     = "UbuntuServer"
+        sku       = "18.04-LTS"
+        version   = "latest"
+    }
+
+    computer_name  = "vm26"
+    admin_username = "azuser"
+    disable_password_authentication = false
+    admin_password = "1244qwer!@#$"
+
+    
+    boot_diagnostics {
+        storage_account_uri = azurerm_storage_account.mystorageaccount.primary_blob_endpoint
+    }
+
+    tags = {
+        environment = "test1"
+    }
+}
+resource "azurerm_managed_disk" "vm26disk" {
+  name                 = "vm26-disk1"
+  location             = "eastus"
+  resource_group_name  = "loconav-test"
+  storage_account_type = "Standard_LRS"
+  create_option        = "Empty"
+  disk_size_gb         = 32
+}
+
+resource "azurerm_virtual_machine_data_disk_attachment" "example26" {
+  managed_disk_id    = azurerm_managed_disk.vm26disk.id
+  virtual_machine_id = azurerm_linux_virtual_machine.terraformvm26.id
+  lun                = "1"
+  caching            = "ReadWrite"
+}
+
+
+resource "azurerm_virtual_machine_extension" "test26" {
+  name                 = "hostname26"
+  virtual_machine_id   = azurerm_linux_virtual_machine.terraformvm26.id
+  publisher            = "Microsoft.Azure.Extensions"
+  type                 = "CustomScript"
+  type_handler_version = "2.0"
+
+  settings = <<SETTINGS
+    {
+        "commandToExecute": "apt-get update; apt-get install perl;useradd -m -p $(perl -e 'print crypt($ARGV[0], \"password\")' 'deployer') \"deployer\"; echo \"deployer ALL=(ALL) NOPASSWD:ALL\" >> /etc/sudoers.d/90-cloud-init-users; apt-get install sshpass"
+    }
+SETTINGS
+}
+
